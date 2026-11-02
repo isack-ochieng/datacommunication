@@ -1,0 +1,44 @@
+name: Build Hospital Packet Tracer Project
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build-hospital-pkt.yml"
+      - "build_narok_hospital.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Packet Tracer file generator
+        run: python -m pip install --upgrade pip packet-tracer-pkt-format==0.4.1
+
+      - name: Generate hospital project
+        run: python build_narok_hospital.py
+
+      - name: Verify generated project
+        run: |
+          test -s Narok_County_Referral_Hospital.pkt
+          file Narok_County_Referral_Hospital.pkt
+          ls -lh Narok_County_Referral_Hospital.pkt
+
+      - name: Upload Packet Tracer project
+        uses: actions/upload-artifact@v4
+        with:
+          name: Narok-Council-Referral-Hospital-PKT
+          path: Narok_County_Referral_Hospital.pkt
+          if-no-files-found: error
+          retention-days: 30
