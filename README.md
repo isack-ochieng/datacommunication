@@ -1,31 +1,30 @@
 # Narok County Referral Hospital — Packet Tracer Project
 
-A proposed Cisco Packet Tracer LAN design for an academic Data Communication assignment.
+Proposed academic LAN design for a Data Communication assignment.
 
-## Build the Packet Tracer file
+## Build without installing Python
 
-**Windows**
-1. Install Python 3.10 or newer.
-2. Download or clone this repository.
-3. Double-click `BUILD.bat`.
-4. Open the generated `Narok_County_Referral_Hospital.pkt` in Cisco Packet Tracer.
+1. Open the repository's **[Actions](https://github.com/isack-ochieng/datacommunication/actions)** tab.
+2. Select **Build Hospital Packet Tracer Project**.
+3. Click **Run workflow** → **Run workflow**.
+4. Open the completed run and download the **Narok-Council-Referral-Hospital-PKT** artifact.
+5. Extract the downloaded ZIP and open `Narok_County_Referral_Hospital.pkt` in Cisco Packet Tracer.
 
-Or run:
+## Build locally (optional)
+
+Local building requires Python 3.10 or newer:
 
 ```powershell
 py -3 build_narok_hospital.py
 ```
 
-The script installs the `packet-tracer-pkt-format` Python package automatically if it is not already installed.
-
 ## Proposed topology
 
-- 1 Catalyst 3650 multilayer core switch
-- 6 Catalyst 2960 departmental access switches
-- 2 Cisco 2911 routers (hospital edge and simulated ISP)
-- Department PCs, two internal servers and one simulated public web server
-- VLANs 10–90 and VLAN 99 for network management
-- Inter-VLAN routing, static routing and a guest-network ACL
+- Catalyst 3650 multilayer core switch
+- Six Catalyst 2960 departmental access switches
+- Two Cisco 2911 routers (hospital edge and simulated ISP)
+- Staff PCs, internal services servers and a simulated public web server
+- Department VLANs, inter-VLAN routing, static routes and a guest-network ACL
 
 ## VLAN and addressing plan
 
@@ -42,14 +41,12 @@ The script installs the `packet-tracer-pkt-format` Python package automatically 
 | 90 | Guest Wi-Fi | 192.168.90.1/24 |
 | 99 | Network management | 192.168.99.1/24 |
 
-## First simulation checks
+## Initial checks
 
-After opening the generated project:
+- From `ADMIN-PC-1`, run `ping 192.168.80.10`.
+- From `GUEST-ACCESS-PC`, run `ping 192.168.80.10`; the guest ACL is intended to block it.
+- Use Packet Tracer's Simulation mode to inspect packets.
 
-1. From `ADMIN-PC-1`, open Desktop → Command Prompt and run `ping 192.168.80.10`.
-2. From `GUEST-ACCESS-PC`, run `ping 192.168.80.10`. The guest ACL is intended to block access to the hospital's private network.
-3. Use Simulation mode to inspect packet movement.
+## Scope
 
-## Important scope note
-
-This is a proposed academic simulation. It is **not** a verified representation of Narok County Referral Hospital's actual network or equipment. The generated file should be opened and checked in the installed Packet Tracer version before submission. The simulation uses representative endpoints and does not implement a production-grade hospital information system or certify regulatory compliance.
+This is a proposed academic simulation, not a verified representation of the hospital's actual network. Open and test the generated file in Packet Tracer before submission. It does not implement a production hospital information system or certify regulatory compliance.
