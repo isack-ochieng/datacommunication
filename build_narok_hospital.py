@@ -244,7 +244,7 @@ def main() -> None:
     # Two access switches are dual-homed to both core switches.
     access1_ports = [
         (1, "Admin-PC-01", 10),
-        (2, "ICT-PC-01", 10),
+        (2, "BIO-Device-01", 110),
         (3, "Reception-PC-01", 20),
         (4, "Emergency-PC-01", 30),
         (5, "ED-NurseStation-01", 30),
@@ -324,7 +324,7 @@ def main() -> None:
     # 3 servers, 1 CCTV NVR and 1 nurse-call gateway.
     endpoint_specs = [
         ("Admin-PC-01", "PC-PT", "10.40.10.10", "10.40.10.1", 10, 170, 870),
-        ("ICT-PC-01", "PC-PT", "10.40.10.11", "10.40.10.1", 10, 290, 870),
+        ("BIO-Device-01", "PC-PT", "10.40.110.10", "10.40.110.1", 110, 290, 870),
         ("Reception-PC-01", "PC-PT", "10.40.20.10", "10.40.20.1", 20, 410, 870),
         ("Emergency-PC-01", "PC-PT", "10.40.30.10", "10.40.30.1", 30, 530, 870),
         ("ED-NurseStation-01", "PC-PT", "10.40.30.11", "10.40.30.1", 30, 650, 870),
@@ -348,8 +348,14 @@ def main() -> None:
         lab.link(access2, f"GigabitEthernet1/0/{port}", device, "FastEthernet0")
 
     # Separate APs keep staff and visitor wireless traffic in separate VLANs.
-    staff_ap = lab.add_device("AccessPoint-PT", "AP-Staff-01", 1420, 650)
-    guest_ap = lab.add_device("AccessPoint-PT", "AP-Guest-01", 1570, 650)
+    staff_ap = lab.add_device(
+        "AccessPoint-PT", "AP-Staff-01", 1420, 650,
+        pc_ip=("10.40.100.230", MASK24, "10.40.100.1"),
+    )
+    guest_ap = lab.add_device(
+        "AccessPoint-PT", "AP-Guest-01", 1570, 650,
+        pc_ip=("10.40.90.230", MASK24, "10.40.90.1"),
+    )
     lab.set_wireless(staff_ap, ssid="Narok-Staff", channel=1)
     lab.set_wireless(guest_ap, ssid="Narok-Guest", channel=6)
     lab.link(access2, "GigabitEthernet1/0/3", staff_ap, "Port 0")
