@@ -119,6 +119,7 @@ jobs:
                   if any(token in tag for token in ("SSID", "AUTHEN", "ENCRYPT", "WPA", "WEP")):
                       wireless_fields.append((tag, node.text or ""))
               print(f"{ap_name} wireless fields: {wireless_fields}")
+              print(f"{ap_name} XML: " + ET.tostring(device, encoding="unicode")[:12000])
               if not any(tag == "SSID" and value for tag, value in wireless_fields):
                   raise SystemExit(f"{ap_name} has no stored SSID configuration.")
               if not any(tag == "AUTHEN_TYPE" and value == "4" for tag, value in wireless_fields):
