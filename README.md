@@ -4,16 +4,15 @@ A proposed academic design and Cisco Packet Tracer simulation for a secure, resi
 
 ## Main deliverables
 
-- [Network Design and Technical Implementation Proposal](docs/Narok_County_Referral_Hospital_Network_Design_Proposal.docx)
-- [Packet Tracer Student Guide and Demonstration Checklist](docs/Narok_Hospital_Packet_Tracer_Student_Guide.docx)
+- The full editable DOCX proposal and Packet Tracer student guide are provided with this project delivery.
 - [Latest successful GitHub Actions build](https://github.com/isack-ochieng/datacommunication/actions/runs/41615518077)
 
 ## Download the Packet Tracer file
 
-The latest validated build is in the GitHub Actions artifact named **Narok-Council-Referral-Hospital-PKT**.
+The latest validated build is saved in the repository at `generated/Narok_County_Referral_Hospital.pkt` and is also available as the GitHub Actions artifact named **Narok-Council-Referral-Hospital-PKT**.
 
 1. Open the [latest successful workflow run](https://github.com/isack-ochieng/datacommunication/actions/runs/41615518077).
-2. Download the artifact and extract its ZIP.
+2. Download the artifact and extract its ZIP, or download the `.pkt` directly from `generated/` in the repository.
 3. Open `Narok_County_Referral_Hospital.pkt` in Cisco Packet Tracer.
 
 No Python installation is required on the student's computer. GitHub Actions runs the generator in its own hosted environment.
