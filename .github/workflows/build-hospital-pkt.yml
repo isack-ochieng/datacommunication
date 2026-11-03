@@ -29,6 +29,43 @@ jobs:
       - name: Generate hospital project
         run: python build_narok_hospital.py
 
+      - name: Decode and inspect generated Packet Tracer project
+        run: |
+          python - <<'PY'
+          from pkt_core import decode
+          import xml.etree.ElementTree as ET
+          path = "Narok_County_Referral_Hospital.pkt"
+          container = decode(path)
+          root = ET.fromstring(container.xml)
+          devices = root.findall("./NETWORK/DEVICES/DEVICE")
+          links = root.findall("./NETWORK/LINKS/LINK")
+          print(f"Container format: {container.format_name}")
+          print(f"Devices: {len(devices)}")
+          print(f"Links: {len(links)}")
+          for device in devices:
+              engine = device.find("ENGINE")
+              name = engine.findtext("NAME") if engine is not None else "?"
+              typ = engine.find("TYPE") if engine is not None else None
+              model = typ.attrib.get("model", "?") if typ is not None else "?"
+              ports = []
+              for port in engine.findall(".//PORT") if engine is not None else []:
+                  labels = [x.text for x in list(port) if x.tag.upper() in {"NAME", "PORTNAME", "LABEL"} and x.text]
+                  ptype = port.findtext("TYPE") or "?"
+                  ports.append("/".join(labels) if labels else ptype)
+              print(f"DEVICE {name} | model={model} | ports={len(ports)} | {', '.join(ports[:8])}")
+          for link in links:
+              cable = link.find("CABLE")
+              if cable is None:
+                  continue
+              print(
+                  "LINK "
+                  + str(cable.findtext("FROM")) + ":" + str(cable.findtext("PORT"))
+                  + " -> " + str(cable.findtext("TO")) + ":" + str(cable.findtext("PORT", "" ) if False else "")
+              )
+          if len(devices) < 30 or len(links) < 20:
+              raise SystemExit("Generated topology is incomplete.")
+          PY
+
       - name: Verify generated project
         run: |
           test -s Narok_County_Referral_Hospital.pkt
