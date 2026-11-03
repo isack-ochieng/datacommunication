@@ -149,6 +149,7 @@ jobs:
             echo "Generated Packet Tracer project is unchanged."
           else
             git commit -m "Update generated Narok hospital Packet Tracer project"
+            git pull --rebase origin main
             git push
           fi
 
