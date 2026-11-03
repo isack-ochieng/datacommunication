@@ -159,7 +159,7 @@ def access_switch_config(name: str, management_ip: str, port_assignments: list[t
     return lines
 
 
-def router_config(name: str, inside_ip: str, outside_ip: str, priority: int, core_primary: str, core_backup: str) -> list[str]:
+def router_config(name: str, inside_ip: str, outside_ip: str, priority: int, core_gateway: str) -> list[str]:
     lines = [
         f"hostname {name}",
         "no ip domain-lookup",
@@ -177,8 +177,7 @@ def router_config(name: str, inside_ip: str, outside_ip: str, priority: int, cor
         f" standby 251 priority {priority}",
         " standby 251 preempt",
         " no shutdown",
-        f"ip route 10.40.0.0 255.255.0.0 {core_primary}",
-        f"ip route 10.40.0.0 255.255.0.0 {core_backup} 200",
+        f"ip route 10.40.0.0 255.255.0.0 {core_gateway}",
         "ip route 0.0.0.0 0.0.0.0 198.51.100.1",
         "end",
     ]
@@ -274,14 +273,14 @@ def main() -> None:
         "2911", "R-Hospital-01", 250, 1000,
         ios_config=router_config(
             "R-Hospital-01", "10.40.254.2", "198.51.100.2", 110,
-            "10.40.254.4", "10.40.254.5",
+            "10.40.254.6",
         ),
     )
     r2 = lab.add_device(
         "2911", "R-Hospital-02", 1150, 1000,
         ios_config=router_config(
             "R-Hospital-02", "10.40.254.3", "198.51.100.3", 100,
-            "10.40.254.5", "10.40.254.4",
+            "10.40.254.6",
         ),
     )
     lab.link(core1, "GigabitEthernet1/0/6", r1, "GigabitEthernet0/0")
