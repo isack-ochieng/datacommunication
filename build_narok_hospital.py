@@ -370,13 +370,15 @@ def main() -> None:
         if broadcast is not None:
             broadcast.text = "1"
         for port in ap.findall(".//PORT"):
-            if port.findtext("TYPE") == "eAccessPointWirelessG":
-                channel = port.find("CHANNEL")
-                if channel is not None:
-                    channel.text = str(standard_channel)
+            port_type = port.findtext("TYPE")
+            if port_type in ("eCopperFastEthernet", "eAccessPointWirelessG"):
                 power = port.find("POWER")
                 if power is not None:
                     power.text = "true"
+            if port_type == "eAccessPointWirelessG":
+                channel = port.find("CHANNEL")
+                if channel is not None:
+                    channel.text = str(standard_channel)
     configure_ap(staff_ap, "Narok-Staff", 0)
     configure_ap(guest_ap, "Narok-Guest", 5)
     print("Access points configured with separate SSIDs, WPA2-PSK authentication and AES encryption.")
