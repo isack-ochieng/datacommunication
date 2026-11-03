@@ -345,8 +345,15 @@ def main() -> None:
         "AccessPoint-PT", "AP-Guest-01", 1570, 650,
         pc_ip=("10.40.90.230", MASK24, "10.40.90.1"),
     )
-    lab.set_wireless(staff_ap, ssid="Narok-Staff", auth_type=4, encrypt_type=4, password="DemoOnly-Staff-2026", channel=1)
-    lab.set_wireless(guest_ap, ssid="Narok-Guest", auth_type=4, encrypt_type=4, password="DemoOnly-Guest-2026", channel=6)
+    staff_wireless_ports = lab.set_wireless(
+        staff_ap, ssid="Narok-Staff", auth_type=4, encrypt_type=4,
+        password="DemoOnly-Staff-2026", channel=1,
+    )
+    guest_wireless_ports = lab.set_wireless(
+        guest_ap, ssid="Narok-Guest", auth_type=4, encrypt_type=4,
+        password="DemoOnly-Guest-2026", channel=6,
+    )
+    print(f"AP wireless settings updated: staff={staff_wireless_ports}, guest={guest_wireless_ports}")
     lab.link(access2, "GigabitEthernet1/0/3", staff_ap, "Port 0")
     lab.link(access2, "GigabitEthernet1/0/4", guest_ap, "Port 0")
 
