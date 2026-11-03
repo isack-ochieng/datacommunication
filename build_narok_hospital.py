@@ -193,6 +193,7 @@ def router_config(name: str, inside_ip: str, outside_ip: str, priority: int, cor
         " standby 251 ip 198.51.100.4",
         f" standby 251 priority {priority}",
         " standby 251 preempt",
+        " standby 251 track GigabitEthernet0/0 20",
         " no shutdown",
         f"ip route 10.40.0.0 255.255.0.0 {core_gateway}",
         "ip route 0.0.0.0 0.0.0.0 198.51.100.1",
