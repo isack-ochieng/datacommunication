@@ -92,7 +92,11 @@ jobs:
           expected_configs = [
               ("SW-Core-01", "standby 10 ip 10.40.10.1"),
               ("SW-Core-02", "standby 10 ip 10.40.10.1"),
+              ("SW-Core-01", "standby 253 ip 10.40.254.6"),
+              ("SW-Core-02", "standby 253 ip 10.40.254.6"),
               ("R-Hospital-01", "standby 251 ip 198.51.100.4"),
+              ("R-Hospital-01", "standby 251 track GigabitEthernet0/0 20"),
+              ("R-Hospital-02", "standby 251 track GigabitEthernet0/0 20"),
               ("R-Hospital-02", "standby 251 ip 198.51.100.4"),
               ("FW-Perimeter", "198.51.100.9"),
               ("R-ISP", "198.51.100.10"),
