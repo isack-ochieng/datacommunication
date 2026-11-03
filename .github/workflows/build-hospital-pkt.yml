@@ -29,49 +29,97 @@ jobs:
       - name: Generate hospital project
         run: python build_narok_hospital.py
 
-      - name: Decode and inspect generated Packet Tracer project
+      - name: Decode and validate Packet Tracer project structure
         run: |
           python - <<'PY'
           from pkt_core import decode
           import xml.etree.ElementTree as ET
+
           path = "Narok_County_Referral_Hospital.pkt"
           container = decode(path)
           root = ET.fromstring(container.xml)
           devices = root.findall("./NETWORK/DEVICES/DEVICE")
           links = root.findall("./NETWORK/LINKS/LINK")
-          print(f"Container format: {container.format_name}")
-          print(f"Devices: {len(devices)}")
-          print(f"Links: {len(links)}")
+
+          by_id = {}
+          names = []
+          configs = {}
           for device in devices:
               engine = device.find("ENGINE")
-              name = engine.findtext("NAME") if engine is not None else "?"
-              typ = engine.find("TYPE") if engine is not None else None
+              name = engine.findtext("NAME") if engine is not None else None
+              if not name:
+                  raise SystemExit("A device has no name.")
+              names.append(name)
+              sid = engine.findtext("SAVE_REF_ID")
+              by_id[sid] = name
+              typ = engine.find("TYPE")
               model = typ.attrib.get("model", "?") if typ is not None else "?"
-              ports = []
-              for port in engine.findall(".//PORT") if engine is not None else []:
-                  labels = [x.text for x in list(port) if x.tag.upper() in {"NAME", "PORTNAME", "LABEL"} and x.text]
-                  ptype = port.findtext("TYPE") or "?"
-                  ports.append("/".join(labels) if labels else ptype)
-              print(f"DEVICE {name} | model={model} | ports={len(ports)} | {', '.join(ports[:8])}")
+              config = "\n".join(x.text or "" for x in engine.findall("RUNNINGCONFIG/LINE"))
+              configs[name] = (model, config)
+
+          if len(names) != len(set(names)):
+              raise SystemExit("Duplicate device names found.")
+          if len(devices) != 28 or len(links) != 30:
+              raise SystemExit(f"Unexpected topology size: {len(devices)} devices, {len(links)} links.")
+
+          required = [
+              "SW-Core-01", "SW-Core-02", "SW-Access-01", "SW-Access-02",
+              "R-Hospital-01", "R-Hospital-02", "FW-Perimeter", "R-ISP",
+              "Admin-PC-01", "BIO-Device-01", "Reception-PC-01",
+              "Emergency-PC-01", "ED-NurseStation-01", "Ward-NurseStation-01",
+              "Lab-PC-01", "Radiology-PC-01", "Pharmacy-PC-01", "Finance-PC-01",
+              "PRN-OPD-01", "PRN-Lab-01", "AP-Staff-01", "AP-Guest-01",
+              "SRV-Clinical-Records", "SRV-DHCP-DNS", "SRV-Backup",
+              "NVR-Security", "GW-Nurse-Call", "SRV-Public-Test",
+          ]
+          missing = sorted(set(required) - set(names))
+          if missing:
+              raise SystemExit("Missing expected devices: " + ", ".join(missing))
+
+          wired_endpoints = required[8:27]
+          if len(wired_endpoints) != 19:
+              raise SystemExit("The 19-port endpoint schedule is not complete.")
+
           for link in links:
               cable = link.find("CABLE")
               if cable is None:
-                  continue
-              ports = [p.text or "?" for p in cable.findall("PORT")]
-              from_port = ports[0] if ports else "?"
-              to_port = ports[1] if len(ports) > 1 else "?"
-              print(
-                  "LINK " + str(cable.findtext("FROM")) + ":" + from_port
-                  + " -> " + str(cable.findtext("TO")) + ":" + to_port
-              )
-          if len(devices) < 28 or len(links) < 30:
-              raise SystemExit("Generated topology is incomplete.")
+                  raise SystemExit("Link without a CABLE element.")
+              a = cable.findtext("FROM")
+              b = cable.findtext("TO")
+              if a not in by_id or b not in by_id:
+                  raise SystemExit(f"Dangling cable reference: {a} -> {b}")
+
+          expected_configs = [
+              ("SW-Core-01", "standby 10 ip 10.40.10.1"),
+              ("SW-Core-02", "standby 10 ip 10.40.10.1"),
+              ("R-Hospital-01", "standby 251 ip 198.51.100.4"),
+              ("R-Hospital-02", "standby 251 ip 198.51.100.4"),
+              ("FW-Perimeter", "198.51.100.9"),
+              ("R-ISP", "198.51.100.10"),
+          ]
+          for name, fragment in expected_configs:
+              if fragment not in configs[name][1]:
+                  raise SystemExit(f"Missing expected configuration on {name}: {fragment}")
+
+          all_lines = "\n".join(cfg for _, cfg in configs.values())
+          if "10.40.254.0 255.255.255.0" in all_lines:
+              raise SystemExit("Router/core transit should use the /29 mask, not /24.")
+          if "198.51.100.5" in all_lines or "198.51.100.6" in all_lines:
+              raise SystemExit("Old overlapping firewall/ISP addressing detected.")
+
+          print(f"Container format: {container.format_name}")
+          print(f"Devices: {len(devices)}")
+          print(f"Links: {len(links)}")
+          print(f"Unique wired endpoint allocation: {len(wired_endpoints)} ports")
+          print("Validated: 14 departmental/security VLANs, /24 user subnets, /29 transit, core and edge HSRP, firewall and ISP device presence.")
+          print("NOTE: This is structural validation of the .pkt file. Packet forwarding and failover must still be tested in Cisco Packet Tracer.")
           PY
 
       - name: Verify generated project
         run: |
           test -s Narok_County_Referral_Hospital.pkt
           file Narok_County_Referral_Hospital.pkt
+          sha256sum Narok_County_Referral_Hospital.pkt
           ls -lh Narok_County_Referral_Hospital.pkt
 
       - name: Upload Packet Tracer project
