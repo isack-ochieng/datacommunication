@@ -13,6 +13,7 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 try:
     from pkt_core import Lab
@@ -362,7 +363,7 @@ def main() -> None:
         for tag, value in values.items():
             element = common.find(tag)
             if element is None:
-                element = __import__("xml.etree.ElementTree", fromlist=["ElementTree"]).SubElement(common, tag)
+                element = ET.SubElement(common, tag)
             element.text = value
         server = ap.find("ENGINE/WIRELESS_SERVER")
         broadcast = server.find("SSID_BROADCAST_ENABLED") if server is not None else None
