@@ -345,15 +345,41 @@ def main() -> None:
         "AccessPoint-PT", "AP-Guest-01", 1570, 650,
         pc_ip=("10.40.90.230", MASK24, "10.40.90.1"),
     )
-    staff_wireless_ports = lab.set_wireless(
-        staff_ap, ssid="Narok-Staff", auth_type=4, encrypt_type=4,
-        password="DemoOnly-Staff-2026", channel=1,
-    )
-    guest_wireless_ports = lab.set_wireless(
-        guest_ap, ssid="Narok-Guest", auth_type=4, encrypt_type=4,
-        password="DemoOnly-Guest-2026", channel=6,
-    )
-    print(f"AP wireless settings updated: staff={staff_wireless_ports}, guest={guest_wireless_ports}")
+    def configure_ap(device_id: str, ssid: str, standard_channel: int) -> None:
+        # AccessPoint-PT stores its settings under ENGINE/WIRELESS_SERVER,
+        # not on the wireless PORT itself (unlike client NIC profiles).
+        ap = lab._els[device_id]
+        common = ap.find("ENGINE/WIRELESS_SERVER/WIRELESS_COMMON")
+        if common is None:
+            raise RuntimeError("Access point has no WIRELESS_SERVER/WIRELESS_COMMON block")
+        values = {
+            "NETWORK_MODE": "3",  # 802.11b/g mixed mode
+            "SSID": ssid,
+            "AUTHEN_TYPE": "4",  # WPA2-PSK
+            "ENCRYPT_TYPE": "4",  # AES
+            "STANDARD_CHANNEL": str(standard_channel),  # 0=channel 1; 5=channel 6
+        }
+        for tag, value in values.items():
+            element = common.find(tag)
+            if element is None:
+                element = __import__("xml.etree.ElementTree", fromlist=["ElementTree"]).SubElement(common, tag)
+            element.text = value
+        server = ap.find("ENGINE/WIRELESS_SERVER")
+        broadcast = server.find("SSID_BROADCAST_ENABLED") if server is not None else None
+        if broadcast is not None:
+            broadcast.text = "1"
+        for port in ap.findall(".//PORT"):
+            if port.findtext("TYPE") == "eAccessPointWirelessG":
+                channel = port.find("CHANNEL")
+                if channel is not None:
+                    channel.text = str(standard_channel)
+                power = port.find("POWER")
+                if power is not None:
+                    power.text = "true"
+    configure_ap(staff_ap, "Narok-Staff", 0)
+    configure_ap(guest_ap, "Narok-Guest", 5)
+    print("Access points configured with separate SSIDs, WPA2-PSK authentication and AES encryption.")
+    print("Set unique PSK passphrases in Packet Tracer Config > Wireless after opening the project.")
     lab.link(access2, "GigabitEthernet1/0/3", staff_ap, "Port 0")
     lab.link(access2, "GigabitEthernet1/0/4", guest_ap, "Port 0")
 
