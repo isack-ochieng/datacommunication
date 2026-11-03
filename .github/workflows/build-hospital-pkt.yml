@@ -111,6 +111,22 @@ jobs:
           print(f"Devices: {len(devices)}")
           print(f"Links: {len(links)}")
           print(f"Unique wired endpoint allocation: {len(wired_endpoints)} ports")
+          for ap_name in ("AP-Staff-01", "AP-Guest-01"):
+              device = next(d for d in devices if d.findtext("ENGINE/NAME") == ap_name)
+              ports = [p for p in device.findall(".//PORT") if p.find("SSID") is not None]
+              if not ports:
+                  raise SystemExit(f"No wireless interface found on {ap_name}.")
+              for port in ports:
+                  auth = port.findtext("AUTHEN_TYPE")
+                  encrypt = port.findtext("ENCRYPT_TYPE")
+                  ssid = port.findtext("SSID")
+                  print(f"{ap_name}: SSID={ssid}, auth_enum={auth}, encryption_enum={encrypt}")
+                  if auth != "4" or encrypt != "4":
+                      raise SystemExit(f"{ap_name} must use WPA2-PSK (enum 4) with AES (enum 4).")
+                  secret_fields = [tag for tag in ("WPA_EAP_PASSWORD", "WPA_PSK_PASSWORD", "WEP_KEY") if port.find(tag) is not None and (port.findtext(tag) or "").strip()]
+                  if not secret_fields:
+                      raise SystemExit(f"{ap_name} has no stored demonstration passphrase.")
+
           print("Validated: 14 departmental/security VLANs, /24 user subnets, /29 transit, core and edge HSRP, firewall and ISP device presence.")
           print("NOTE: This is structural validation of the .pkt file. Packet forwarding and failover must still be tested in Cisco Packet Tracer.")
           PY
