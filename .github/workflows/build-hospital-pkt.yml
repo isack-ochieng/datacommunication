@@ -119,7 +119,6 @@ jobs:
                   if any(token in tag for token in ("SSID", "AUTHEN", "ENCRYPT", "WPA", "WEP")):
                       wireless_fields.append((tag, node.text or ""))
               print(f"{ap_name} wireless fields: {wireless_fields}")
-              print(f"{ap_name} XML: " + ET.tostring(device, encoding="unicode")[:12000])
               if not any(tag == "SSID" and value for tag, value in wireless_fields):
                   raise SystemExit(f"{ap_name} has no stored SSID configuration.")
               if not any(tag == "AUTHEN_TYPE" and value == "4" for tag, value in wireless_fields):
@@ -128,6 +127,7 @@ jobs:
                   raise SystemExit(f"{ap_name} does not show AES encryption enum 4.")
 
           print("Validated: 14 departmental/security VLANs, /24 user subnets, /29 transit, core and edge HSRP, firewall and ISP device presence.")
+          print("Wireless pre-shared keys are intentionally left for manual configuration in Packet Tracer; no production credentials are stored in this public repository.")
           print("NOTE: This is structural validation of the .pkt file. Packet forwarding and failover must still be tested in Cisco Packet Tracer.")
           PY
 
