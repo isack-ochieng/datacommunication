@@ -4,13 +4,11 @@ A proposed secure, segmented and resilient LAN design for the Data Communication
 
 ## Download the Packet Tracer project (no local Python required)
 
-1. Open the repository's [Actions](https://github.com/isack-ochieng/datacommunication/actions) tab.
-2. Select **Build Hospital Packet Tracer Project**.
-3. Open the latest successful run.
-4. Download the `Narok-Council-Referral-Hospital-PKT` artifact.
-5. Extract the downloaded ZIP and open `Narok_County_Referral_Hospital.pkt` in Cisco Packet Tracer.
+**Direct project file:** [generated/Narok_County_Referral_Hospital.pkt](https://github.com/isack-ochieng/datacommunication/raw/refs/heads/main/generated/Narok_County_Referral_Hospital.pkt)
 
-The workflow runs the generator, decodes and checks the Packet Tracer container, counts devices and links, then uploads the `.pkt` as an artifact.
+Open the raw file link to download the native `.pkt`, then open it in Cisco Packet Tracer.
+
+To regenerate it, open [GitHub Actions](https://github.com/isack-ochieng/datacommunication/actions), select **Build Hospital Packet Tracer Project**, and click **Run workflow**. The workflow builds the file, decodes and validates the container structure, checks the expected devices, links and configuration fragments, commits the output to `generated/`, and uploads a 30-day artifact. No local Python installation is needed.
 
 ## What the simulation contains
 
@@ -76,9 +74,9 @@ Python 3.10+ is required only when generating locally:
 py -3 build_narok_hospital.py
 ```
 
-## Project documents
+## Companion documents
 
-See the design proposal and Packet Tracer walkthrough in the repository's `docs/` directory when published.
+The Network Design and Technical Implementation Proposal and the Packet Tracer Walkthrough are provided as separate DOCX deliverables with this project handover.
 
 ## Scope notice
 
